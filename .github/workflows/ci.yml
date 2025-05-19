@@ -2,9 +2,9 @@ name: CI/CD Pipeline
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [ master, develop ]
   pull_request:
-    branches: [ main, develop ]
+    branches: [ master, develop ]
 
 jobs:
   build-and-test:
@@ -40,7 +40,7 @@ jobs:
       run: pnpm build
 
     - name: Deploy to Server
-      if: github.ref == 'refs/heads/main'
+      if: github.ref == 'refs/heads/master'
       uses: appleboy/scp-action@master
       with:
         host: ${{ secrets.SERVER_HOST }}
@@ -52,7 +52,7 @@ jobs:
         overwrite: true
 
     # - name: Restart Nginx
-    #   if: github.ref == 'refs/heads/main'
+    #   if: github.ref == 'refs/heads/master'
     #   uses: appleboy/ssh-action@master
     #   with:
     #     host: ${{ secrets.SERVER_HOST }}
@@ -63,6 +63,6 @@ jobs:
 
     # 如果需要部署，可以取消下面的注释并配置相应的部署步骤
     # - name: Deploy
-    #   if: github.ref == 'refs/heads/main'
+    #   if: github.ref == 'refs/heads/master'
     #   run: |
     #     # 在这里添加部署命令 
