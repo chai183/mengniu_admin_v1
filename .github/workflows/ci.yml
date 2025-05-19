@@ -11,33 +11,33 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v3
+    # - uses: actions/checkout@v3
 
-    - name: Setup Node.js
-      uses: actions/setup-node@v3
-      with:
-        node-version: '18'
+    # - name: Setup Node.js
+    #   uses: actions/setup-node@v3
+    #   with:
+    #     node-version: '18'
 
-    - name: Install pnpm
-      run: |
-        npm install -g pnpm@8
-        pnpm --version
+    # - name: Install pnpm
+    #   run: |
+    #     npm install -g pnpm@8
+    #     pnpm --version
 
-    - name: Get pnpm store directory
-      shell: bash
-      run: |
-        echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+    # - name: Get pnpm store directory
+    #   shell: bash
+    #   run: |
+    #     echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
 
-    - name: Setup pnpm cache
-      uses: actions/cache@v3
-      with:
-        path: ${{ env.STORE_PATH }}
-        key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-        restore-keys: |
-          ${{ runner.os }}-pnpm-store-
+    # - name: Setup pnpm cache
+    #   uses: actions/cache@v3
+    #   with:
+    #     path: ${{ env.STORE_PATH }}
+    #     key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+    #     restore-keys: |
+    #       ${{ runner.os }}-pnpm-store-
 
-    - name: Install dependencies
-      run: pnpm install
+    # - name: Install dependencies
+    #   run: pnpm install
 
     # - name: Run ESLint
     #   run: pnpm lint
@@ -48,8 +48,8 @@ jobs:
     # - name: Run tests
     #   run: pnpm test
 
-    - name: Build
-      run: pnpm build
+    # - name: Build
+    #   run: pnpm build
 
     - name: Deploy to Server
       if: github.ref == 'refs/heads/master'
@@ -57,7 +57,8 @@ jobs:
       with:
         host: ${{ secrets.SERVER_HOST }}
         username: ${{ secrets.SERVER_USERNAME }}
-        key: ${{ secrets.SERVER_SSH_KEY }}
+        # key: ${{ secrets.SERVER_SSH_KEY }}
+        password: ${{ secrets.SERVER_PASSWORD }}
         source: "dist/*"
         target: "/var/www/html"
         strip_components: 0
