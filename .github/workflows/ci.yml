@@ -1,0 +1,68 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+        cache: 'pnpm'
+
+    - name: Install pnpm
+      uses: pnpm/action-setup@v2
+      with:
+        version: 8
+
+    - name: Install dependencies
+      run: pnpm install
+
+    # - name: Run ESLint
+    #   run: pnpm lint
+
+    # - name: Type check
+    #   run: pnpm type-check
+
+    # - name: Run tests
+    #   run: pnpm test
+
+    - name: Build
+      run: pnpm build
+
+    - name: Deploy to Server
+      if: github.ref == 'refs/heads/main'
+      uses: appleboy/scp-action@master
+      with:
+        host: ${{ secrets.SERVER_HOST }}
+        username: ${{ secrets.SERVER_USERNAME }}
+        key: ${{ secrets.SERVER_SSH_KEY }}
+        source: "dist/*"
+        target: "/var/www/html"
+        strip_components: 0
+        overwrite: true
+
+    # - name: Restart Nginx
+    #   if: github.ref == 'refs/heads/main'
+    #   uses: appleboy/ssh-action@master
+    #   with:
+    #     host: ${{ secrets.SERVER_HOST }}
+    #     username: ${{ secrets.SERVER_USERNAME }}
+    #     key: ${{ secrets.SERVER_SSH_KEY }}
+    #     script: |
+    #       sudo systemctl restart nginx
+
+    # 如果需要部署，可以取消下面的注释并配置相应的部署步骤
+    # - name: Deploy
+    #   if: github.ref == 'refs/heads/main'
+    #   run: |
+    #     # 在这里添加部署命令 
