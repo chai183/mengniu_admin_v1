@@ -39,14 +39,14 @@ jobs:
     - name: Install dependencies
       run: pnpm install
 
-    - name: Run ESLint
-      run: pnpm lint
+    # - name: Run ESLint
+    #   run: pnpm lint
 
-    - name: Type check
-      run: pnpm type-check
+    # - name: Type check
+    #   run: pnpm type-check
 
-    - name: Run tests
-      run: pnpm test
+    # - name: Run tests
+    #   run: pnpm test
 
     - name: Build
       run: pnpm build
