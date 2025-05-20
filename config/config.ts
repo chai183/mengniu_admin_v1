@@ -8,6 +8,7 @@ import routes from './routes';
 const { REACT_APP_ENV = 'dev' } = process.env;
 
 export default defineConfig({
+  base: '/admin/',
   publicPath: '/admin/',
   /**
    * @name 开启 hash 模式
