@@ -94,13 +94,13 @@ export const errorConfig: RequestConfig = {
   // ],
 
   // // 响应拦截器
-  // responseInterceptors: [
-  //   (response) => {
-  //     const { message: msg, success = true } = response.data;
-  //     if (success === false) {
-  //       message.error(msg);
-  //     }
-  //     return response;
-  //   },
-  // ],
+  responseInterceptors: [
+    (response) => {
+      const { message: msg, success = true } = response.data;
+      if (success === false) {
+        message.error(msg);
+      }
+      return response.data;
+    },
+  ],
 };

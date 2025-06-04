@@ -42,14 +42,11 @@ export default () => {
   return <>
     <ProTable
       actionRef={actionRef}
-      request={async ({ current, pageSize, ...rest }) => {
-        const response = await getUserList({
-          page: current || 1,
-          limit: pageSize || 10,
-          ...rest
-        });
-        return response.data;
-      }}
+      request={async ({ current, pageSize, ...rest }) => getUserList({
+        page: current || 1,
+        limit: pageSize || 10,
+        ...rest
+      })}
       search={{
         defaultCollapsed: true
       }}

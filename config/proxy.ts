@@ -41,7 +41,7 @@ export default {
   },
   pre: {
     '/api/': {
-      target: 'your pre url',
+      target: 'http://czyymf.xyz',
       changeOrigin: true,
       pathRewrite: { '^': '' },
     },

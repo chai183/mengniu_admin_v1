@@ -68,32 +68,12 @@ const Login: React.FC = () => {
   };
 
   const handleSubmit = async (values) => {
-    try {
-      // 登录
-      const msg = await login(values);
-      if (msg.code === 200) {
-        const defaultLoginSuccessMessage = intl.formatMessage({
-          id: 'pages.login.success',
-          defaultMessage: '登录成功！',
-        });
-        message.success(defaultLoginSuccessMessage);
-        localStorage.setItem('token', msg.data.access_token);
-        await fetchUserInfo();
-        const urlParams = new URL(window.location.href).searchParams;
-        history.push(urlParams.get('redirect') || '/');
-        return;
-      }
-      console.log(msg);
-      // 如果失败去设置用户错误信息
-      setUserLoginState(msg);
-    } catch (error) {
-      const defaultLoginFailureMessage = intl.formatMessage({
-        id: 'pages.login.failure',
-        defaultMessage: '登录失败，请重试！',
-      });
-      console.log(error);
-      message.error(defaultLoginFailureMessage);
-    }
+    const { access_token } = await login(values);
+    message.success('登录成功！');
+    localStorage.setItem('token', access_token);
+    await fetchUserInfo();
+    // const urlParams = new URL(window.location.href).searchParams;
+    history.push('/');
   };
 
   return (
@@ -106,6 +86,7 @@ const Login: React.FC = () => {
         onFinish={handleSubmit}
       >
         <ProFormText
+          initialValue="admin"
           name="account"
           fieldProps={{
             size: 'large',
