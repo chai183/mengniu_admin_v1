@@ -9,7 +9,7 @@ import { errorConfig } from './requestErrorConfig';
 import { getProfile as queryCurrentUser } from '@/services';
 import React from 'react';
 const isDev = process.env.NODE_ENV === 'development';
-const loginPath = '/admin/user/login';
+const loginPath = '/user/login';
 
 /**
  * @see  https://umijs.org/zh-CN/plugins/plugin-initial-state
@@ -30,7 +30,7 @@ export async function getInitialState(): Promise<{
   };
   // 如果不是登录页面，执行
   const { location } = history;
-  if (location.pathname !== loginPath) {
+  if (!location.pathname.includes(loginPath)) {
     const currentUser = await fetchUserInfo();
     
     return {
