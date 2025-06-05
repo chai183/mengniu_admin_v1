@@ -7,9 +7,9 @@ import {
   LoginForm,
   ProFormText,
 } from '@ant-design/pro-components';
-import { FormattedMessage, history, SelectLang, useIntl, useModel } from '@umijs/max';
+import { history, useModel } from '@umijs/max';
 import { message } from 'antd';
-import React, { useState } from 'react';
+import React from 'react';
 import { flushSync } from 'react-dom';
 import { createStyles } from 'antd-style';
 
@@ -50,10 +50,8 @@ const useStyles = createStyles(({ token }) => {
 });
 
 const Login: React.FC = () => {
-  const [userLoginState, setUserLoginState] = useState<API.LoginResult>({});
   const { initialState, setInitialState } = useModel('@@initialState');
   const { styles } = useStyles();
-  const intl = useIntl();
 
   const fetchUserInfo = async () => {
     const userInfo = await initialState?.fetchUserInfo?.();
@@ -92,19 +90,11 @@ const Login: React.FC = () => {
             size: 'large',
             prefix: <UserOutlined />,
           }}
-          placeholder={intl.formatMessage({
-            id: 'pages.login.account.placeholder',
-            defaultMessage: '用户名: admin or user',
-          })}
+          placeholder="请输入用户名"
           rules={[
             {
               required: true,
-              message: (
-                <FormattedMessage
-                  id="pages.login.account.required"
-                  defaultMessage="请输入用户名!"
-                />
-              ),
+              message: "请输入用户名",
             },
           ]}
         />
@@ -114,19 +104,11 @@ const Login: React.FC = () => {
             size: 'large',
             prefix: <LockOutlined />,
           }}
-          placeholder={intl.formatMessage({
-            id: 'pages.login.password.placeholder',
-            defaultMessage: '密码: ant.design',
-          })}
+          placeholder="请输入密码"
           rules={[
             {
               required: true,
-              message: (
-                <FormattedMessage
-                  id="pages.login.password.required"
-                  defaultMessage="请输入密码！"
-                />
-              ),
+              message: "请输入密码",
             },
           ]}
         />
