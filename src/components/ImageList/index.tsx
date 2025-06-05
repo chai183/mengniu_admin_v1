@@ -23,7 +23,7 @@ const ImageList: React.FC<ImageListProps> = ({ images }) => {
           <Image
             width={100}
             height={100}
-            src={image}
+            src={'/' + image}
             alt={`图片 ${index + 1}`}
             className={styles.image}
             preview={{
