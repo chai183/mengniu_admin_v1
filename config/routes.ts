@@ -47,6 +47,12 @@ export default [
     component: './Shop',
   },
   {
+    path: '/good',
+    name: '商品',
+    icon: 'ShopOutlined',
+    component: './Good',
+  },
+  {
     path: '/',
     redirect: '/customer',
   },

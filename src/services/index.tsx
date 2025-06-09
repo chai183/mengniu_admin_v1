@@ -276,6 +276,93 @@ export const deleteFollowUp = async (id: number, options?: { [key: string]: any 
   });
 };
 
+// 商品相关接口类型定义
+export interface CreateGoodDto {
+  name: string;
+  price: number;
+  description?: string;
+  image?: string;
+  stock?: number;
+  status?: number;
+}
+
+export interface UpdateGoodDto extends Partial<CreateGoodDto> {
+  id: number;
+}
+
+export interface Good {
+  id: number;
+  name: string;
+  price: number;
+  description?: string;
+  image?: string;
+  stock?: number;
+  status?: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// 商品列表分页参数
+export interface GoodPageParams {
+  page?: number;
+  limit?: number;
+  name?: string;
+  status?: number;
+}
+
+// 商品列表响应
+export interface GoodPageResponse {
+  items: Good[];
+  total: number;
+}
+
+// 商品相关接口
+export const getGoodList = async (params: GoodPageParams, options?: { [key: string]: any }) => {
+  return request<GoodPageResponse>('/good/page', {
+    method: 'GET',
+    params,
+    ...(options || {}),
+  });
+};
+
+export const createGood = async (data: CreateGoodDto, options?: { [key: string]: any }) => {
+  return request<Good>('/good', {
+    method: 'POST',
+    data,
+    ...(options || {}),
+  });
+};
+
+export const getAllGoods = async (params?: GoodPageParams, options?: { [key: string]: any }) => {
+  return request<Good[]>('/good', {
+    method: 'GET',
+    params,
+    ...(options || {}),
+  });
+};
+
+export const getGoodById = async (id: number, options?: { [key: string]: any }) => {
+  return request<Good>(`/good/${id}`, {
+    method: 'GET',
+    ...(options || {}),
+  });
+};
+
+export const updateGood = async (id: number, data: UpdateGoodDto, options?: { [key: string]: any }) => {
+  return request<Good>(`/good/${id}`, {
+    method: 'PATCH',
+    data,
+    ...(options || {}),
+  });
+};
+
+export const deleteGood = async (id: number, options?: { [key: string]: any }) => {
+  return request(`/good/${id}`, {
+    method: 'DELETE',
+    ...(options || {}),
+  });
+};
+
 
 
 
