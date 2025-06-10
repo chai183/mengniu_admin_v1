@@ -1,12 +1,13 @@
-import { ProList } from "@ant-design/pro-components";
+import { ProTable } from "@ant-design/pro-components";
 import { getCustomerList } from "@/services";
 import { Avatar, Space, Tag } from "antd";
 import ImageList from "@/components/ImageList";
-import { QueryFilter, ProFormText, ProFormDateRangePicker, ProFormCheckbox, ProFormRadio, ProFormSelect } from "@ant-design/pro-components";
+import { ProFormText, ProFormDateRangePicker, ProFormCheckbox, ProFormRadio, ProFormSelect } from "@ant-design/pro-components";
 import moment from "moment";
 import { useRef, useState } from "react";
 import { getAllGoods } from "@/services";
 import { useRequest } from "ahooks";
+import type { ActionType, ProColumns } from "@ant-design/pro-components";
 
 interface CustomerListItem {
     id: string;
@@ -19,8 +20,9 @@ interface CustomerListItem {
     remark: string;
     createTime: string;
     images: string;
+    shopList?: number[];
+    status: CustomerStatus;
 }
-
 
 export enum CustomerStatus {
     PENDING = 0,  // 待跟进
@@ -28,7 +30,7 @@ export enum CustomerStatus {
     LOST = 2      // 已流失
 }
 
-const statusMap = {
+const statusMap: Record<CustomerStatus, { text: string; color: string }> = {
     [CustomerStatus.PENDING]: {
         text: '待跟进',
         color: 'blue'
@@ -43,7 +45,7 @@ const statusMap = {
     }
 }
 
-const genderMap = {
+const genderMap: Record<number, { text: string; color: string }> = {
     0: {
         text: '未知',
         color: 'default'
@@ -60,7 +62,7 @@ const genderMap = {
 
 export default () => {
 
-    const actionRef = useRef();
+    const actionRef = useRef<ActionType>();
     const [searchParams, setSearchParams] = useState({});
 
     const { data: goodsList } = useRequest(getAllGoods);
@@ -69,77 +71,132 @@ export default () => {
         return acc;
     }, {});
 
-    return <>
-        <QueryFilter defaultCollapsed={false}
-            onFinish={async (values) => {
-                setSearchParams(values);
-                actionRef.current?.reload();
-            }}
-            onReset={async () => {
-                setSearchParams({});
-                actionRef.current?.reload();
-            }}
-        >
-            <ProFormText name="name" label="客户名称" />
-            <ProFormText name="phone" label="手机号" />
-            <ProFormDateRangePicker name="createTime" label="创建时间" />
-            <ProFormText name="detail" label="客户信息" />
-            <ProFormSelect name="shopList" mode="multiple" label="购买产品" options={goodsList?.map((el: any) => ({
-                label: el.name,
-                value: el.id
-            }))} />
-            <ProFormRadio.Group name="gender" label="性别" valueEnum={genderMap} />
-            <ProFormCheckbox.Group name="status" label="客户状态" valueEnum={statusMap} />
+    const columns: ProColumns<CustomerListItem>[] = [
+        {
+            title: '客户名称',
+            dataIndex: 'name',
+            key: 'name',
+            hideInTable: true,
+        },
+        {
+            title: '手机号',
+            dataIndex: 'phone',
+            key: 'phone',
+            hideInTable: true,
+        },
+        {
+            title: '客户信息',
+            key: 'customer',
+            search: false,
+            render: (_, record) => (
+                <Space>
+                    <Avatar src={record.avatar} />
+                    <div>
+                        <div>
+                            <span style={{ fontSize: '16px', fontWeight: 'bold', marginRight: 10 }}>{record.name || '--'}</span>
+                            <Tag color={genderMap[record.gender]?.color}>{genderMap[record.gender]?.text}</Tag>
+                            <Tag color={statusMap[record.status]?.color}>{statusMap[record.status]?.text}</Tag>
+                        </div>
+                        <div style={{ color: '#666' }}>
+                            电话：{record.phone}
+                        </div>
+                    </div>
+                </Space>
+            )
+        },
+        {
+            title: '客户信息',
+            dataIndex: 'detail',
+            key: 'detail',
+            ellipsis: true,
+            render: (_, record) => record.detail || '--'
+        },
+        {
+            title: '购买产品',
+            key: 'shopList',
+            valueType: 'select',
+            fieldProps: {
+                mode: 'multiple',
+                options: goodsList?.map((el: any) => ({
+                    label: el.name,
+                    value: el.id
+                }))
+            },
+            render: (_, record) => (
+                <div>
+                    {record.shopList?.map((el: any) => {
+                        const good = goodsMap?.[el];
+                        return good ? <Tag key={el} color={`#${good.color}`} style={{ color: '#000' }}>{good?.name}</Tag> : null;
+                    }) || '--'}
+                </div>
+            )
+        },
+        {
+            title: '创建时间',
+            dataIndex: 'createTime',
+            key: 'createTime',
+            valueType: 'dateRange',
+            render: (_, record) => moment(record.createTime).format('YYYY-MM-DD HH:mm:ss')
+        },
+        {
+            title: '相关图片',
+            key: 'images',
+            search: false,
+            render: (_, record) => <ImageList images={record.images} />
+        },
+        {
+            title: '客户状态',
+            dataIndex: 'status',
+            key: 'status',
+            valueType: 'checkbox',
+            valueEnum: statusMap,
+            hideInTable: true,
+        },
+        {
+            title: '性别',
+            dataIndex: 'gender',
+            key: 'gender',
+            valueType: 'radio',
+            valueEnum: genderMap,
+            hideInTable: true,
+        },
+    ];
 
-        </QueryFilter>
-        <ProList<CustomerListItem>
+    return (
+        <ProTable<CustomerListItem>
             actionRef={actionRef}
-            search={false}
-            request={async ({ current, pageSize, ...rest }) => getCustomerList({
-                page: current || 1,
-                limit: pageSize || 10,
-                ...rest,
-                ...searchParams
-            })}
-            metas={{
-                title: {
-                    dataIndex: 'name',
-                    render: (text: string, record: CustomerListItem) => (
-                        <Space>
-                            <Avatar src={record.avatar} />
-                            {text || '--'}
-                        </Space>
-                    )
-                },
-                description: {
-                    dataIndex: 'detail',
-                    render: (text: string, record: CustomerListItem) => (<Space direction="vertical" size="small">
-                        <div>客户信息：{record.detail || '--'}</div>
-                        <div>购买产品：{record.shopList?.map((el: any) => {
-                            const good = goodsMap[el];
-                            return <Tag key={el.id} color={`#${good.color}`} style={{ color: '#000' }}>{good?.name}</Tag>
-                        }) || '--'}</div>
-                        <div>创建时间：{moment(record.createTime).format('YYYY-MM-DD HH:mm:ss')}</div>
-                    </Space>)
-                },
-                subTitle: {
-                    render: (_: any, record: CustomerListItem) => (
-                        <Space size={0}>
-                            <Tag color={statusMap[record.status].color}>{statusMap[record.status].text}</Tag>
-                            <Tag color={genderMap[record.gender].color}>{genderMap[record.gender].text}</Tag>
-                            <Tag>电话：{record.phone}</Tag>
-                        </Space>
-                    )
-                },
-                content: {
-                    render: (_: any, record: CustomerListItem) => (<ImageList images={record.images} />)
-                }
+            columns={columns}
+            request={async ({ current, pageSize, ...rest }) => {
+                const params = {
+                    page: current || 1,
+                    limit: pageSize || 10,
+                    ...rest,
+                    ...searchParams
+                };
+                return getCustomerList(params);
             }}
             rowKey="id"
             pagination={{
-                pageSize: 10
+                pageSize: 10,
+                showSizeChanger: true,
             }}
+            search={{
+                defaultCollapsed: false,
+            }}
+            onSubmit={(values: any) => {
+                setSearchParams(values);
+                actionRef.current?.reload();
+            }}
+            onReset={() => {
+                setSearchParams({});
+                actionRef.current?.reload();
+            }}
+            dateFormatter="string"
+            headerTitle="客户列表"
+            toolBarRender={() => [
+                // 可以在这里添加操作按钮
+            ]}
         />
-    </>
+    )
 }
 

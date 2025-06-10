@@ -43,7 +43,7 @@ export default [
   {
     path: '/shop',
     name: '跟进记录',
-    icon: 'shop',
+    icon: 'ReconciliationOutlined',
     component: './Shop',
   },
   {
