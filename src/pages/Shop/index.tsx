@@ -1,13 +1,29 @@
-import { ProTable } from "@ant-design/pro-components";
-import { getFollowUpList } from "@/services";
-import { Tabs } from "antd";
+import { ProTable, ProColumns } from "@ant-design/pro-components";
+import { getFollowUpList, getCustomerList } from "@/services";
+import { Tabs, Avatar, Space } from "antd";
 import ImageList from "@/components/ImageList";
+import moment from "moment";
 
 export default () => {
 
-    const columns = [{
-        title: '客户ID',
-        dataIndex: 'customerId'
+    const columns: ProColumns<any>[] = [{
+        title: '客户',
+        dataIndex: 'customerId',
+        valueType: 'select',
+        fieldProps: {
+            showSearch: true,
+        },
+        debounceTime: 500,
+        request: async ({ keyWords }) => {
+            const res = await getCustomerList({ page: 1, limit: 20, name: keyWords });
+            return res.data.map((el: any) => ({
+                label: <Space>
+                    <Avatar src={el.avatar} />
+                    {el.name}
+                </Space>,
+                value: el.id
+            }))
+        }
     }, {
         title: '跟进内容',
         dataIndex: 'content',
@@ -18,16 +34,19 @@ export default () => {
     }, {
         title: '跟进时间',
         dataIndex: 'createTime',
-        valueType: 'dateTime'
+        valueType: 'dateTimeRange',
+        render: (text, { createTime }) => {
+            return moment(createTime).format('YYYY-MM-DD HH:mm:ss')
+        }
     }, {
         title: '跟进人',
-        dataIndex: 'creater'
+        dataIndex: 'creater',
+        hideInSearch: true
     }]
 
     return <Tabs>
         <Tabs.TabPane tab="产品跟进" key="1">
             <ProTable
-                search={false}
                 columns={columns}
                 request={async ({ current, pageSize, ...rest }) => getFollowUpList({
                     page: current || 1,
@@ -39,7 +58,6 @@ export default () => {
         </Tabs.TabPane>
         <Tabs.TabPane tab="家访跟进" key="2">
             <ProTable
-                search={false}
                 columns={columns}
                 request={async ({ current, pageSize, ...rest }) => getFollowUpList({
                     page: current || 1,
