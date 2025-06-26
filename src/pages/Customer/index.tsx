@@ -1,5 +1,5 @@
 import { ProTable } from "@ant-design/pro-components";
-import { getCustomerList } from "@/services";
+import { getCustomerList, getAllUsers } from "@/services";
 import { Avatar, Space, Tag } from "antd";
 import ImageList from "@/components/ImageList";
 import { ProFormText, ProFormDateRangePicker, ProFormCheckbox, ProFormRadio, ProFormSelect } from "@ant-design/pro-components";
@@ -64,6 +64,8 @@ export default () => {
 
     const actionRef = useRef<ActionType>();
     const [searchParams, setSearchParams] = useState({});
+
+    const { data: allUsers } = useRequest(getAllUsers);
 
     const { data: goodsList } = useRequest(getAllGoods);
     const goodsMap = goodsList?.reduce((acc: any, item: any) => {
@@ -131,13 +133,13 @@ export default () => {
                 </div>
             )
         },
-        {
-            title: '创建时间',
-            dataIndex: 'createTime',
-            key: 'createTime',
-            valueType: 'dateRange',
-            render: (_, record) => moment(record.createTime).format('YYYY-MM-DD HH:mm:ss')
-        },
+        // {
+        //     title: '创建时间',
+        //     dataIndex: 'createTime',
+        //     key: 'createTime',
+        //     valueType: 'dateRange',
+        //     render: (_, record) => moment(record.createTime).format('YYYY-MM-DD HH:mm:ss')
+        // },
         {
             title: '相关图片',
             key: 'images',
@@ -159,7 +161,18 @@ export default () => {
             valueType: 'radio',
             valueEnum: genderMap,
             hideInTable: true,
-        },
+        }, {
+            title: '跟进人',
+            dataIndex: 'followUserids',
+            valueType: 'select',
+            fieldProps: {
+                showSearch: true,
+                options: allUsers?.filter((el: any) => el.userid).map((el: any) => ({
+                    label: el.name,
+                    value: el.userid
+                }))
+            }
+        }
     ];
 
     return (

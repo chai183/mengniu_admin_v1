@@ -1,3 +1,6 @@
+const baseUrl = 'http://czyymf.xyz';
+const localUrl = 'http://localhost:3000';
+
 /**
  * @name 代理的配置
  * @see 在生产环境 代理是无法生效的，所以这里没有生产环境的配置
@@ -23,7 +26,7 @@ export default {
   // },
   dev: {
     '/api': {
-      target: 'http://czyymf.xyz',
+      target: localUrl,
       changeOrigin: true,
     },
   },
@@ -41,7 +44,7 @@ export default {
   },
   pre: {
     '/api/': {
-      target: 'http://czyymf.xyz',
+      target: baseUrl,
       changeOrigin: true,
       pathRewrite: { '^': '' },
     },
