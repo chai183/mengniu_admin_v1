@@ -65,7 +65,7 @@ const Login: React.FC = () => {
     }
   };
 
-  const handleSubmit = async (values) => {
+  const handleSubmit = async (values: any) => {
     const { access_token } = await login(values);
     message.success('登录成功！');
     localStorage.setItem('token', access_token);

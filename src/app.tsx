@@ -104,8 +104,8 @@ export const layout: RunTimeLayoutConfig = ({ initialState, setInitialState }) =
 export const request = {
   baseURL: '/api',
   timeout: 10000, // 10秒超时
-  headers: {
-    'Authorization': `Bearer ${localStorage.getItem('token')}`,
-  },
+  // headers: {
+  //   'Authorization': `Bearer ${localStorage.getItem('token')}`,
+  // },
   ...errorConfig,
 };
