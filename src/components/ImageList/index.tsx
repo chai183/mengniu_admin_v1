@@ -15,7 +15,7 @@ const ImageList: React.FC<ImageListProps> = ({ images }) => {
     <Image.PreviewGroup>
       <List
         grid={{
-          gutter: 16
+          gutter: 16,
         }}
         dataSource={imageArray}
         renderItem={(image, index) => (
@@ -23,7 +23,7 @@ const ImageList: React.FC<ImageListProps> = ({ images }) => {
             <Image
               width={100}
               height={100}
-              src={'http://czyymf.xyz/' + image}
+              src={'/' + image}
               alt={`图片 ${index + 1}`}
               preview={{
                 mask: '点击预览',

@@ -1,4 +1,4 @@
-const baseUrl = 'http://czyymf.xyz';
+const baseUrl = 'https://hezhenli.top';
 const localUrl = 'http://localhost:3000';
 
 /**
