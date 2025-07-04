@@ -1,5 +1,5 @@
 import { ProTable, ModalForm } from "@ant-design/pro-components";
-import { getCustomerList, updateCustomer, getAllUsers, deleteCustomer, uploadFile } from "@/services";
+import { getCustomerList, updateCustomer, getAllUsers, deleteCustomer, createFollowUp, uploadFile } from "@/services";
 import { Avatar, Space, Tag, Button, Popconfirm } from "antd";
 import ImageList from "@/components/ImageList";
 import { ProFormText, ProFormTextArea, ProFormCheckbox, ProFormRadio, ProFormUploadButton } from "@ant-design/pro-components";
@@ -74,6 +74,13 @@ export default () => {
     }, {});
 
     const { run: updateCustomerRun } = useRequest(updateCustomer, {
+        manual: true,
+        onSuccess: () => {
+            actionRef.current?.reload();
+        }
+    });
+
+    const { run: createFollowUpRun } = useRequest(createFollowUp, {
         manual: true,
         onSuccess: () => {
             actionRef.current?.reload();
@@ -190,7 +197,42 @@ export default () => {
         {
             title: '操作',
             valueType: 'option',
+            width: 220,
             render: (_, record) => <Space>
+                <ModalForm
+                    key={record.id}
+                    title="添加跟进"
+                    width={500}
+                    trigger={<Button type="link" size="small">添加跟进</Button>}
+                    onFinish={async (values) => {
+                        const { images = [], ...rest } = values;
+                        if (images.length > 0) {
+                            const uploadPromises = await Promise.all(images.map(async ({ originFileObj, url }: any) => {
+                                if (url) {
+                                    return url;
+                                }
+                                const result = await uploadFile(originFileObj);
+                                return result.filename;
+                            }));
+                            rest.images = uploadPromises.join(',');
+                        }
+                        await createFollowUpRun({
+                            customerId: Number(record.id),
+                            ...rest
+                        } as any);
+                        return true;
+                    }}
+                >
+                    <ProFormRadio.Group initialValue={1} name="type" label="跟进类型" options={[{
+                        label: '产品跟进',
+                        value: 1
+                    }, {
+                        label: '家访跟进',
+                        value: 2
+                    }]} />
+                    <ProFormTextArea name="content" label="跟进内容" />
+                    <ProFormUploadButton name="images" label="相关图片" listType="picture-card" />
+                </ModalForm>
                 <ModalForm
                     key={record.id}
                     initialValues={{
@@ -199,7 +241,7 @@ export default () => {
                     }}
                     title="编辑客户"
                     width={500}
-                    trigger={<Button type="link">编辑</Button>}
+                    trigger={<Button type="link" size="small">编辑</Button>}
                     onFinish={async (values) => {
                         const { images = [], ...rest } = values;
                         if (images.length > 0) {
@@ -238,7 +280,7 @@ export default () => {
                 <Popconfirm title="确定删除该客户吗？" onConfirm={() => {
                     deleteCustomerRun(Number(record.id));
                 }}>
-                    <Button type="link" danger>删除</Button>
+                    <Button type="link" danger size="small">删除</Button>
                 </Popconfirm>
             </Space>
         }
