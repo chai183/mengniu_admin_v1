@@ -109,7 +109,7 @@ export default () => {
                     <Avatar src={record.avatar} />
                     <div>
                         <div>
-                            <span style={{ fontSize: '16px', fontWeight: 'bold', marginRight: 10 }}>{record.remark_name ?? record.name ?? '--'}</span>
+                            <span style={{ fontSize: '16px', fontWeight: 'bold', marginRight: 10 }}>{record.name ?? '--'}</span>
                             <Tag color={genderMap[record.gender]?.color}>{genderMap[record.gender]?.text}</Tag>
                             <Tag color={statusMap[record.status]?.color}>{statusMap[record.status]?.text}</Tag>
                         </div>

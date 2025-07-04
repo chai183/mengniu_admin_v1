@@ -20,7 +20,7 @@ export default () => {
         renderText: (text, { customer }) => {
             return <Space>
                 <Avatar src={customer?.avatar} />
-                {customer?.remark_name ?? customer?.name ?? '--'}
+                {customer?.name ?? '--'}
             </Space>
         },
         debounceTime: 500,
@@ -30,7 +30,7 @@ export default () => {
             }
             const res = await getCustomerList({ page: 1, limit: 20, name: keyWords });
             return res.data.map((el: any) => ({
-                label: el.remark_name ?? el.name ?? '--',
+                label: el.name ?? '--',
                 value: el.id
             }))
         }
