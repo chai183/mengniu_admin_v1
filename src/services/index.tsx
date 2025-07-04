@@ -363,6 +363,29 @@ export const deleteGood = async (id: number, options?: { [key: string]: any }) =
   });
 };
 
+// 文件上传相关接口类型定义
+export interface UploadResponse {
+  url: string;
+  filename: string;
+  size: number;
+  mimetype: string;
+}
+
+// 文件上传接口
+export const uploadFile = async (file: File, options?: { [key: string]: any }) => {
+  const formData = new FormData();
+  formData.append('file', file);
+  
+  return request<UploadResponse>('/upload', {
+    method: 'POST',
+    data: formData,
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+    ...(options || {}),
+  });
+};
+
 
 
 

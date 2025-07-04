@@ -1,8 +1,8 @@
-import { ProTable } from "@ant-design/pro-components";
-import { getCustomerList, getAllUsers } from "@/services";
-import { Avatar, Space, Tag } from "antd";
+import { ProTable, ModalForm } from "@ant-design/pro-components";
+import { getCustomerList, updateCustomer, getAllUsers, deleteCustomer, uploadFile } from "@/services";
+import { Avatar, Space, Tag, Button, Popconfirm } from "antd";
 import ImageList from "@/components/ImageList";
-import { ProFormText, ProFormDateRangePicker, ProFormCheckbox, ProFormRadio, ProFormSelect } from "@ant-design/pro-components";
+import { ProFormText, ProFormTextArea, ProFormSelect, ProFormRadio, ProFormUploadButton } from "@ant-design/pro-components";
 import moment from "moment";
 import { useRef, useState } from "react";
 import { getAllGoods } from "@/services";
@@ -72,6 +72,20 @@ export default () => {
         acc[`${item.id}`] = item;
         return acc;
     }, {});
+
+    const { run: updateCustomerRun } = useRequest(updateCustomer, {
+        manual: true,
+        onSuccess: () => {
+            actionRef.current?.reload();
+        }
+    });
+
+    const { run: deleteCustomerRun } = useRequest(deleteCustomer, {
+        manual: true,
+        onSuccess: () => {
+            actionRef.current?.reload();
+        }
+    });
 
     const columns: ProColumns<CustomerListItem>[] = [
         {
@@ -172,6 +186,60 @@ export default () => {
                     value: el.userid
                 }))
             }
+        },
+        {
+            title: '操作',
+            valueType: 'option',
+            render: (_, record) => <Space>
+                <ModalForm
+                    key={record.id}
+                    initialValues={{
+                        ...record,
+                        images: record.images?.split(',').map(el => ({ url: '/' + el }))
+                    }}
+                    title="编辑客户"
+                    width={500}
+                    trigger={<Button type="link">编辑</Button>}
+                    onFinish={async (values) => {
+                        const { images, ...rest } = values;
+                        const uploadPromises = await Promise.all(images.map(async ({ originFileObj, url }: any) => {
+                            if (url) {
+                                return url;
+                            }
+                            const result = await uploadFile(originFileObj);
+                            return result.filename;
+                        }));
+                        rest.images = uploadPromises.join(',');
+                        await updateCustomerRun(Number(record.id), rest as any);
+                        return true;
+                    }}
+                >
+                    <ProFormText name="name" label="客户名称" disabled />
+                    <ProFormText name="phone" label="手机号" />
+                    <ProFormSelect name="shopList" mode="multiple" label="购买产品" options={goodsList?.map((el: any) => ({
+                        label: el.name,
+                        value: `${el.id}`
+                    }))} />
+                    <ProFormRadio.Group name="status" label="客户状态" options={[{
+                        label: '待跟进',
+                        value: CustomerStatus.PENDING
+                    }, {
+                        label: '已成交',
+                        value: CustomerStatus.DEAL
+                    }, {
+                        label: '已流失',
+                        value: CustomerStatus.LOST
+                    }]} />
+                    <ProFormTextArea name="detail" label="客户信息" />
+                    <ProFormUploadButton name="images" label="相关图片" listType="picture-card" />
+                    {/* <ProFormText name="images" label="相关图片" /> */}
+                </ModalForm>
+                <Popconfirm title="确定删除该客户吗？" onConfirm={() => {
+                    deleteCustomerRun(Number(record.id));
+                }}>
+                    <Button type="link" danger>删除</Button>
+                </Popconfirm>
+            </Space>
         }
     ];
 
