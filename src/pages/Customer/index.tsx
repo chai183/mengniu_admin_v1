@@ -195,7 +195,7 @@ export default () => {
                     key={record.id}
                     initialValues={{
                         ...record,
-                        images: record.images?.split(',').filter((el: string) => el).map((el: string) => ({ url: '/' + el }))
+                        images: record.images?.split(',').filter((el: string) => el)
                     }}
                     title="编辑客户"
                     width={500}
@@ -234,7 +234,6 @@ export default () => {
                     }]} />
                     <ProFormTextArea name="detail" label="客户信息" />
                     <ProFormUploadButton name="images" label="相关图片" listType="picture-card" />
-                    {/* <ProFormText name="images" label="相关图片" /> */}
                 </ModalForm>
                 <Popconfirm title="确定删除该客户吗？" onConfirm={() => {
                     deleteCustomerRun(Number(record.id));
