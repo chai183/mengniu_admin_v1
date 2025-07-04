@@ -195,21 +195,23 @@ export default () => {
                     key={record.id}
                     initialValues={{
                         ...record,
-                        images: record.images?.split(',').map(el => ({ url: '/' + el }))
+                        images: record.images?.split(',').filter((el: string) => el).map((el: string) => ({ url: '/' + el }))
                     }}
                     title="编辑客户"
                     width={500}
                     trigger={<Button type="link">编辑</Button>}
                     onFinish={async (values) => {
-                        const { images, ...rest } = values;
-                        const uploadPromises = await Promise.all(images.map(async ({ originFileObj, url }: any) => {
-                            if (url) {
-                                return url;
-                            }
+                        const { images = [], ...rest } = values;
+                        if (images.length > 0) {
+                            const uploadPromises = await Promise.all(images.map(async ({ originFileObj, url }: any) => {
+                                if (url) {
+                                    return url;
+                                }
                             const result = await uploadFile(originFileObj);
-                            return result.filename;
-                        }));
-                        rest.images = uploadPromises.join(',');
+                                return result.filename;
+                            }));
+                            rest.images = uploadPromises.join(',');
+                        }
                         await updateCustomerRun(Number(record.id), rest as any);
                         return true;
                     }}
