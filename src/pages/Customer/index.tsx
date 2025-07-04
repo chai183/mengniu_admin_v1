@@ -2,7 +2,7 @@ import { ProTable, ModalForm } from "@ant-design/pro-components";
 import { getCustomerList, updateCustomer, getAllUsers, deleteCustomer, uploadFile } from "@/services";
 import { Avatar, Space, Tag, Button, Popconfirm } from "antd";
 import ImageList from "@/components/ImageList";
-import { ProFormText, ProFormTextArea, ProFormSelect, ProFormRadio, ProFormUploadButton } from "@ant-design/pro-components";
+import { ProFormText, ProFormTextArea, ProFormCheckbox, ProFormRadio, ProFormUploadButton } from "@ant-design/pro-components";
 import moment from "moment";
 import { useRef, useState } from "react";
 import { getAllGoods } from "@/services";
@@ -218,7 +218,7 @@ export default () => {
                 >
                     <ProFormText name="name" label="客户名称" disabled />
                     <ProFormText name="phone" label="手机号" />
-                    <ProFormSelect name="shopList" mode="multiple" label="购买产品" options={goodsList?.map((el: any) => ({
+                    <ProFormCheckbox.Group name="shopList" label="购买产品" options={goodsList?.map((el: any) => ({
                         label: el.name,
                         value: `${el.id}`
                     }))} />
