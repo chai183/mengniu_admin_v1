@@ -155,4 +155,7 @@ export default defineConfig({
   },
   esbuildMinifyIIFE: true,
   requestRecord: {},
+  favicons: [
+    'http://wx.qlogo.cn/mmhead/hqDXUD6csU8fwOic5LrOtJnylfJWupUPBjnqIE6eNVs4EE0ibqOtUc3Lyxtd1ibcYp8szAIqFpfZjs/0',
+  ],
 });

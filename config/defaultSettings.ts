@@ -17,7 +17,7 @@ const Settings: ProLayoutProps & {
   colorWeak: false,
   title: '客户档案管理后台',
   pwa: true,
-  // logo: 'https://gw.alipayobjects.com/zos/rmsportal/KDpgvguMpGfqaHPjicRK.svg',
+  logo: 'http://wx.qlogo.cn/mmhead/hqDXUD6csU8fwOic5LrOtJnylfJWupUPBjnqIE6eNVs4EE0ibqOtUc3Lyxtd1ibcYp8szAIqFpfZjs/0',
   iconfontUrl: '',
   token: {
     // 参见ts声明，demo 见文档，通过token 修改样式
