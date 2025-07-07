@@ -154,7 +154,7 @@ export const getUserById = async (id: number, options?: { [key: string]: any }) 
   });
 };
 
-export const updateUser = async (id: number, data: UpdateUserDto, options?: { [key: string]: any }) => {
+export const updateUser = async (id: number, data: any, options?: { [key: string]: any }) => {
   return request<User>(`/user/${id}`, {
     method: 'PATCH',
     data,

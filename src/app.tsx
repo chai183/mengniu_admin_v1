@@ -32,7 +32,6 @@ export async function getInitialState(): Promise<{
   const { location } = history;
   if (!location.pathname.includes(loginPath)) {
     const currentUser = await fetchUserInfo();
-    
     return {
       fetchUserInfo,
       currentUser,

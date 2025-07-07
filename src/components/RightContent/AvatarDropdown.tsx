@@ -1,13 +1,15 @@
-import { logout } from '@/services';
+import { updateUser } from '@/services';
 import { LogoutOutlined, SettingOutlined, UserOutlined } from '@ant-design/icons';
 import { history, useModel } from '@umijs/max';
-import { Spin } from 'antd';
+import { Spin, message } from 'antd';
 import { createStyles } from 'antd-style';
 import { stringify } from 'querystring';
 import type { MenuInfo } from 'rc-menu/lib/interface';
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import { flushSync } from 'react-dom';
 import HeaderDropdown from '../HeaderDropdown';
+import { ModalForm, ProFormText } from "@ant-design/pro-components";
+import { LockOutlined } from '@ant-design/icons';
 
 export type GlobalHeaderRightProps = {
   menu?: boolean;
@@ -17,7 +19,7 @@ export type GlobalHeaderRightProps = {
 export const AvatarName = () => {
   const { initialState } = useModel('@@initialState');
   const { currentUser } = initialState || {};
-  return <span className="anticon">{currentUser?.account}</span>;
+  return <span className="anticon">{currentUser?.name}</span>;
 };
 
 const useStyles = createStyles(({ token }) => {
@@ -39,6 +41,9 @@ const useStyles = createStyles(({ token }) => {
 });
 
 export const AvatarDropdown: React.FC<GlobalHeaderRightProps> = ({ menu, children }) => {
+
+  const [open, setOpen] = useState(false);
+
   /**
    * 退出登录，并且将当前的 url 保存
    */
@@ -73,7 +78,9 @@ export const AvatarDropdown: React.FC<GlobalHeaderRightProps> = ({ menu, childre
         loginOut();
         return;
       }
-      history.push(`/account/${key}`);
+      if (key === 'changePassword') {
+        setOpen(true);
+      }
     },
     [setInitialState],
   );
@@ -96,28 +103,16 @@ export const AvatarDropdown: React.FC<GlobalHeaderRightProps> = ({ menu, childre
 
   const { currentUser } = initialState;
 
-  if (!currentUser || !currentUser.account) {
+  if (!currentUser || !currentUser.name) {
     return loading;
   }
 
   const menuItems = [
-    ...(menu
-      ? [
-          {
-            key: 'center',
-            icon: <UserOutlined />,
-            label: '个人中心',
-          },
-          {
-            key: 'settings',
-            icon: <SettingOutlined />,
-            label: '个人设置',
-          },
-          {
-            type: 'divider' as const,
-          },
-        ]
-      : []),
+    {
+      key: 'changePassword',
+      icon: <SettingOutlined />,
+      label: '修改密码',
+    },
     {
       key: 'logout',
       icon: <LogoutOutlined />,
@@ -126,14 +121,49 @@ export const AvatarDropdown: React.FC<GlobalHeaderRightProps> = ({ menu, childre
   ];
 
   return (
-    <HeaderDropdown
-      menu={{
-        selectedKeys: [],
-        onClick: onMenuClick,
-        items: menuItems,
-      }}
-    >
-      {children}
-    </HeaderDropdown>
+    <>
+      <ModalForm
+        open={open}
+        onOpenChange={setOpen}
+        title="修改密码"
+        width={500}
+        onFinish={async (values) => {
+          if (values.password !== values.confirmPassword) {
+            message.error('两次密码不一致');
+            return;
+          }
+          await updateUser(currentUser.id, {
+            id: currentUser.id,
+            password: values.password,
+          });
+          message.success('密码修改成功');
+          onMenuClick({ key: 'logout' } as any);
+        }}
+      >
+        <ProFormText.Password
+          name="password"
+          fieldProps={{
+            size: 'large',
+            prefix: <LockOutlined />,
+          }}
+        />
+        <ProFormText.Password
+          name="confirmPassword"
+          fieldProps={{
+            size: 'large',
+            prefix: <LockOutlined />,
+          }}
+        />
+      </ModalForm>
+      <HeaderDropdown
+        menu={{
+          selectedKeys: [],
+          onClick: onMenuClick,
+          items: menuItems,
+        }}
+      >
+        {children}
+      </HeaderDropdown>
+    </>
   );
 };
