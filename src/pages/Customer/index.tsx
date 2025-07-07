@@ -1,6 +1,6 @@
 import { ProTable, ModalForm } from "@ant-design/pro-components";
 import { getCustomerList, updateCustomer, getAllUsers, deleteCustomer, createFollowUp, uploadFile } from "@/services";
-import { Avatar, Space, Tag, Button, Popconfirm } from "antd";
+import { Avatar, Space, Tag, Button, Popconfirm, Tabs } from "antd";
 import ImageList from "@/components/ImageList";
 import { ProFormText, ProFormTextArea, ProFormCheckbox, ProFormRadio, ProFormUploadButton } from "@ant-design/pro-components";
 import moment from "moment";
@@ -22,6 +22,7 @@ interface CustomerListItem {
     images: string;
     shopList?: number[];
     status: CustomerStatus;
+    isActive: boolean;
 }
 
 export enum CustomerStatus {
@@ -60,7 +61,7 @@ const genderMap: Record<number, { text: string; color: string }> = {
     }
 }
 
-export default () => {
+const CustomerList = ({ isActive }: { isActive: boolean }) => {
 
     const actionRef = useRef<ActionType>();
     const [searchParams, setSearchParams] = useState({});
@@ -81,13 +82,6 @@ export default () => {
     });
 
     const { run: createFollowUpRun } = useRequest(createFollowUp, {
-        manual: true,
-        onSuccess: () => {
-            actionRef.current?.reload();
-        }
-    });
-
-    const { run: deleteCustomerRun } = useRequest(deleteCustomer, {
         manual: true,
         onSuccess: () => {
             actionRef.current?.reload();
@@ -198,7 +192,7 @@ export default () => {
             title: '操作',
             valueType: 'option',
             width: 220,
-            render: (_, record) => <Space>
+            render: (_, record) => record.isActive ? <Space>
                 <ModalForm
                     key={record.id}
                     title="添加跟进"
@@ -278,11 +272,17 @@ export default () => {
                     <ProFormUploadButton name="images" label="相关图片" listType="picture-card" />
                 </ModalForm>
                 <Popconfirm title="确定删除该客户吗？" onConfirm={() => {
-                    deleteCustomerRun(Number(record.id));
+                    updateCustomerRun(Number(record.id), {
+                        isActive: false
+                    } as any);
                 }}>
                     <Button type="link" danger size="small">删除</Button>
                 </Popconfirm>
-            </Space>
+            </Space> : <Button type="link" size="small" onClick={() => {
+                updateCustomerRun(Number(record.id), {
+                    isActive: true
+                } as any);
+            }}>恢复</Button>
         }
     ];
 
@@ -294,6 +294,7 @@ export default () => {
                 const params = {
                     page: current || 1,
                     limit: pageSize || 10,
+                    isActive: isActive ? 1 : 0,
                     ...rest,
                     ...searchParams
                 };
@@ -316,11 +317,22 @@ export default () => {
                 actionRef.current?.reload();
             }}
             dateFormatter="string"
-            headerTitle="客户列表"
+            headerTitle={isActive ? '客户列表' : '已删除客户'}
             toolBarRender={() => [
                 // 可以在这里添加操作按钮
             ]}
         />
     )
+}
+
+export default () => {
+    return <Tabs>
+        <Tabs.TabPane tab="客户列表" key="1">
+            <CustomerList isActive={true} />
+        </Tabs.TabPane>
+        <Tabs.TabPane tab="已删除客户" key="2">
+            <CustomerList isActive={false} />
+        </Tabs.TabPane>
+    </Tabs>
 }
 
