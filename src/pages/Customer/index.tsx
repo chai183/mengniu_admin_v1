@@ -1,5 +1,5 @@
 import { ProTable, ModalForm } from "@ant-design/pro-components";
-import { getCustomerList, updateCustomer, getAllUsers, deleteCustomer, createFollowUp, uploadFile } from "@/services";
+import { getCustomerList, updateCustomer, getAllUsers, createCustomer, createFollowUp, uploadFile } from "@/services";
 import { Avatar, Space, Tag, Button, Popconfirm, Tabs } from "antd";
 import ImageList from "@/components/ImageList";
 import { ProFormText, ProFormTextArea, ProFormCheckbox, ProFormRadio, ProFormUploadButton } from "@ant-design/pro-components";
@@ -61,6 +61,74 @@ const genderMap: Record<number, { text: string; color: string }> = {
     }
 }
 
+const CustomerModal = ({ record, onSuccess, goodsList, isAdd = false }: { record?: any, onSuccess?: () => void, goodsList?: any[], isAdd?: boolean }) => {
+
+    const { run: updateCustomerRun } = useRequest(updateCustomer, {
+        manual: true,
+        onSuccess: () => {
+            onSuccess?.();
+        }
+    });
+
+    const { run: createCustomerRun } = useRequest(createCustomer, {
+        manual: true,
+        onSuccess: () => {
+            onSuccess?.();
+        }
+    });
+
+    
+
+    return <ModalForm
+        key={record?.id}
+        initialValues={record ? {
+            ...record,
+            images: record.images?.split(',').filter((el: string) => el)
+        } : undefined}
+        title="编辑客户"
+        width={500}
+        trigger={isAdd ? <Button type="primary">添加客户</Button> : <Button type="link" size="small">编辑</Button>}
+        onFinish={async (values) => {
+            const { images = [], ...rest } = values;
+            if (images.length > 0) {
+                const uploadPromises = await Promise.all(images.map(async ({ originFileObj, url }: any) => {
+                    if (url) {
+                        return url;
+                    }
+                    const result = await uploadFile(originFileObj);
+                    return result.filename;
+                }));
+                rest.images = uploadPromises.join(',');
+            }
+            if (isAdd) {
+                await createCustomerRun(rest as any);
+            } else {
+                await updateCustomerRun(Number(record.id), rest as any);
+            }
+            return true;
+        }}
+    >
+        <ProFormText name="name" label="客户名称" disabled={!isAdd} />
+        <ProFormText name="phone" label="手机号" />
+        <ProFormCheckbox.Group name="shopList" label="购买产品" options={goodsList?.map((el: any) => ({
+            label: el.name,
+            value: `${el.id}`
+        }))} />
+        <ProFormRadio.Group name="status" label="客户状态" options={[{
+            label: '待跟进',
+            value: CustomerStatus.PENDING
+        }, {
+            label: '已成交',
+            value: CustomerStatus.DEAL
+        }, {
+            label: '已流失',
+            value: CustomerStatus.LOST
+        }]} />
+        <ProFormTextArea name="detail" label="客户信息" />
+        <ProFormUploadButton name="images" label="相关图片" listType="picture-card" />
+    </ModalForm>
+}
+
 const CustomerList = ({ isActive }: { isActive: boolean }) => {
 
     const actionRef = useRef<ActionType>();
@@ -74,14 +142,14 @@ const CustomerList = ({ isActive }: { isActive: boolean }) => {
         return acc;
     }, {});
 
-    const { run: updateCustomerRun } = useRequest(updateCustomer, {
+    const { run: createFollowUpRun } = useRequest(createFollowUp, {
         manual: true,
         onSuccess: () => {
             actionRef.current?.reload();
         }
     });
 
-    const { run: createFollowUpRun } = useRequest(createFollowUp, {
+    const { run: updateCustomerRun } = useRequest(updateCustomer, {
         manual: true,
         onSuccess: () => {
             actionRef.current?.reload();
@@ -227,50 +295,9 @@ const CustomerList = ({ isActive }: { isActive: boolean }) => {
                     <ProFormTextArea name="content" label="跟进内容" />
                     <ProFormUploadButton name="images" label="相关图片" listType="picture-card" />
                 </ModalForm>
-                <ModalForm
-                    key={record.id}
-                    initialValues={{
-                        ...record,
-                        images: record.images?.split(',').filter((el: string) => el)
-                    }}
-                    title="编辑客户"
-                    width={500}
-                    trigger={<Button type="link" size="small">编辑</Button>}
-                    onFinish={async (values) => {
-                        const { images = [], ...rest } = values;
-                        if (images.length > 0) {
-                            const uploadPromises = await Promise.all(images.map(async ({ originFileObj, url }: any) => {
-                                if (url) {
-                                    return url;
-                                }
-                                const result = await uploadFile(originFileObj);
-                                return result.filename;
-                            }));
-                            rest.images = uploadPromises.join(',');
-                        }
-                        await updateCustomerRun(Number(record.id), rest as any);
-                        return true;
-                    }}
-                >
-                    <ProFormText name="name" label="客户名称" disabled />
-                    <ProFormText name="phone" label="手机号" />
-                    <ProFormCheckbox.Group name="shopList" label="购买产品" options={goodsList?.map((el: any) => ({
-                        label: el.name,
-                        value: `${el.id}`
-                    }))} />
-                    <ProFormRadio.Group name="status" label="客户状态" options={[{
-                        label: '待跟进',
-                        value: CustomerStatus.PENDING
-                    }, {
-                        label: '已成交',
-                        value: CustomerStatus.DEAL
-                    }, {
-                        label: '已流失',
-                        value: CustomerStatus.LOST
-                    }]} />
-                    <ProFormTextArea name="detail" label="客户信息" />
-                    <ProFormUploadButton name="images" label="相关图片" listType="picture-card" />
-                </ModalForm>
+                <CustomerModal onSuccess={
+                    () => actionRef.current?.reload()
+                } goodsList={goodsList} record={record} />
                 <Popconfirm title="确定删除该客户吗？" onConfirm={() => {
                     updateCustomerRun(Number(record.id), {
                         isActive: false
@@ -319,6 +346,9 @@ const CustomerList = ({ isActive }: { isActive: boolean }) => {
             dateFormatter="string"
             headerTitle={isActive ? '客户列表' : '已删除客户'}
             toolBarRender={() => [
+                <CustomerModal isAdd onSuccess={
+                    () => actionRef.current?.reload()
+                } goodsList={goodsList} />
                 // 可以在这里添加操作按钮
             ]}
         />
