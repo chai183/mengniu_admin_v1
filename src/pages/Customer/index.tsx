@@ -108,7 +108,7 @@ const CustomerModal = ({ record, onSuccess, goodsList, isAdd = false, allUsers }
             return true;
         }}
     >
-        <ProFormText name="name" label="客户名称" disabled={!isAdd} rules={[{ required: true, message: '请输入客户名称' }]} />
+        <ProFormText name="name" label="客户名称" disabled={record?.userid} rules={[{ required: true, message: '请输入客户名称' }]} />
         {
             isAdd && <ProFormSelect name="followUserids" label="跟进人" options={allUsers?.filter((el: any) => el.userid).map((el: any) => ({
                 label: el.name,
