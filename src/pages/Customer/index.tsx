@@ -2,7 +2,7 @@ import { ProTable, ModalForm } from "@ant-design/pro-components";
 import { getCustomerList, updateCustomer, getAllUsers, createCustomer, createFollowUp, uploadFile } from "@/services";
 import { Avatar, Space, Tag, Button, Popconfirm, Tabs } from "antd";
 import ImageList from "@/components/ImageList";
-import { ProFormText, ProFormTextArea, ProFormCheckbox, ProFormRadio, ProFormUploadButton } from "@ant-design/pro-components";
+import { ProFormText, ProFormTextArea, ProFormCheckbox, ProFormSelect, ProFormRadio, ProFormUploadButton } from "@ant-design/pro-components";
 import moment from "moment";
 import { useRef, useState } from "react";
 import { getAllGoods } from "@/services";
@@ -61,7 +61,9 @@ const genderMap: Record<number, { text: string; color: string }> = {
     }
 }
 
-const CustomerModal = ({ record, onSuccess, goodsList, isAdd = false }: { record?: any, onSuccess?: () => void, goodsList?: any[], isAdd?: boolean }) => {
+const CustomerModal = ({ record, onSuccess, goodsList, isAdd = false, allUsers }:
+    { record?: any, onSuccess?: () => void, goodsList?: any[], isAdd?: boolean, allUsers?: any[] }
+) => {
 
     const { run: updateCustomerRun } = useRequest(updateCustomer, {
         manual: true,
@@ -76,8 +78,6 @@ const CustomerModal = ({ record, onSuccess, goodsList, isAdd = false }: { record
             onSuccess?.();
         }
     });
-
-    
 
     return <ModalForm
         key={record?.id}
@@ -108,7 +108,13 @@ const CustomerModal = ({ record, onSuccess, goodsList, isAdd = false }: { record
             return true;
         }}
     >
-        <ProFormText name="name" label="客户名称" disabled={!isAdd} />
+        <ProFormText name="name" label="客户名称" disabled={!isAdd} rules={[{ required: true, message: '请输入客户名称' }]} />
+        {
+            isAdd && <ProFormSelect name="followUserids" label="跟进人" options={allUsers?.filter((el: any) => el.userid).map((el: any) => ({
+                label: el.name,
+                value: el.userid
+            }))} rules={[{ required: true, message: '请选择跟进人' }]} />
+        }
         <ProFormText name="phone" label="手机号" />
         <ProFormCheckbox.Group name="shopList" label="购买产品" options={goodsList?.map((el: any) => ({
             label: el.name,
@@ -295,7 +301,7 @@ const CustomerList = ({ isActive }: { isActive: boolean }) => {
                     <ProFormTextArea name="content" label="跟进内容" />
                     <ProFormUploadButton name="images" label="相关图片" listType="picture-card" />
                 </ModalForm>
-                <CustomerModal onSuccess={
+                <CustomerModal allUsers={allUsers} onSuccess={
                     () => actionRef.current?.reload()
                 } goodsList={goodsList} record={record} />
                 <Popconfirm title="确定删除该客户吗？" onConfirm={() => {
@@ -346,7 +352,7 @@ const CustomerList = ({ isActive }: { isActive: boolean }) => {
             dateFormatter="string"
             headerTitle={isActive ? '客户列表' : '已删除客户'}
             toolBarRender={() => [
-                <CustomerModal isAdd onSuccess={
+                <CustomerModal allUsers={allUsers} isAdd onSuccess={
                     () => actionRef.current?.reload()
                 } goodsList={goodsList} />
                 // 可以在这里添加操作按钮
