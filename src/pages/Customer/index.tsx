@@ -1,5 +1,5 @@
 import { ProTable, ModalForm } from "@ant-design/pro-components";
-import { getCustomerList, updateCustomer, getAllUsers, createCustomer, createFollowUp, uploadFile } from "@/services";
+import { getCustomerList, updateCustomer, getAllUsers, createCustomer, createFollowUp } from "@/services";
 import { Avatar, Space, Tag, Button, Popconfirm, Tabs } from "antd";
 import ImageList from "@/components/ImageList";
 import { ProFormText, ProFormTextArea, ProFormCheckbox, ProFormSelect, ProFormRadio, ProFormUploadButton } from "@ant-design/pro-components";
@@ -92,14 +92,12 @@ const CustomerModal = ({ record, onSuccess, goodsList, isAdd = false, allUsers }
         trigger={isAdd ? <Button type="primary">添加客户</Button> : <Button type="link" size="small">编辑</Button>}
         onFinish={async (values) => {
             const { images = [], ...rest } = values;
-            console.log(images);
             if (images.length > 0) {
-                const uploadPromises = await Promise.all(images.map(async ({ originFileObj, url }: any) => {
+                const uploadPromises = await Promise.all(images.map(async ({ url, response }: any) => {
                     if (url) {
                         return url.slice(1);
                     }
-                    const result = await uploadFile(originFileObj);
-                    return result.filename;
+                    return response?.data?.filename ?? '';
                 }));
                 rest.images = uploadPromises.join(',');
             }
@@ -134,7 +132,7 @@ const CustomerModal = ({ record, onSuccess, goodsList, isAdd = false, allUsers }
             value: CustomerStatus.LOST
         }]} />
         <ProFormTextArea name="detail" label="客户信息" />
-        <ProFormUploadButton name="images" label="相关图片" listType="picture-card" />
+        <ProFormUploadButton fieldProps={{ action: '/api/upload', accept: 'image/*' }} name="images" label="相关图片" listType="picture-card" />
     </ModalForm>
 }
 
@@ -278,12 +276,11 @@ const CustomerList = ({ isActive }: { isActive: boolean }) => {
                     onFinish={async (values) => {
                         const { images = [], ...rest } = values;
                         if (images.length > 0) {
-                            const uploadPromises = await Promise.all(images.map(async ({ originFileObj, url }: any) => {
+                            const uploadPromises = await Promise.all(images.map(async ({ response, url }: any) => {
                                 if (url) {
                                     return url;
                                 }
-                                const result = await uploadFile(originFileObj);
-                                return result.filename;
+                                return response?.data?.filename ?? '';
                             }));
                             rest.images = uploadPromises.join(',');
                         }
@@ -302,7 +299,7 @@ const CustomerList = ({ isActive }: { isActive: boolean }) => {
                         value: 2
                     }]} />
                     <ProFormTextArea name="content" label="跟进内容" />
-                    <ProFormUploadButton name="images" label="相关图片" listType="picture-card" />
+                    <ProFormUploadButton fieldProps={{ action: '/api/upload', accept: 'image/*' }} name="images" label="相关图片" listType="picture-card" />
                 </ModalForm>
                 <CustomerModal allUsers={allUsers} onSuccess={
                     () => actionRef.current?.reload()
