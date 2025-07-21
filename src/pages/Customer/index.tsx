@@ -83,17 +83,20 @@ const CustomerModal = ({ record, onSuccess, goodsList, isAdd = false, allUsers }
         key={record?.id}
         initialValues={record ? {
             ...record,
-            images: record.images?.split(',').filter((el: string) => el)
+            images: record.images?.split(',').filter((el: string) => el).map((el: string) => ({
+                url: "/" + el
+            }))
         } : undefined}
         title="编辑客户"
         width={500}
         trigger={isAdd ? <Button type="primary">添加客户</Button> : <Button type="link" size="small">编辑</Button>}
         onFinish={async (values) => {
             const { images = [], ...rest } = values;
+            console.log(images);
             if (images.length > 0) {
                 const uploadPromises = await Promise.all(images.map(async ({ originFileObj, url }: any) => {
                     if (url) {
-                        return url;
+                        return url.slice(1);
                     }
                     const result = await uploadFile(originFileObj);
                     return result.filename;
