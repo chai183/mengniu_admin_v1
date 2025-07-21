@@ -200,7 +200,6 @@ const CustomerList = ({ isActive }: { isActive: boolean }) => {
             title: '客户信息',
             dataIndex: 'detail',
             key: 'detail',
-            ellipsis: true,
             render: (_, record) => record.detail || '--'
         },
         {
@@ -234,6 +233,7 @@ const CustomerList = ({ isActive }: { isActive: boolean }) => {
             title: '相关图片',
             key: 'images',
             search: false,
+            width: 350,
             render: (_, record) => <ImageList images={record.images} />
         },
         {
