@@ -52,7 +52,7 @@ export default () => {
         }
     },
     {
-        title: '跟进人',
+        title: '记录人',
         dataIndex: 'creater',
         valueType: 'select',
         width: 200,
