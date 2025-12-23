@@ -245,6 +245,13 @@ const CustomerList = ({ isActive }: { isActive: boolean }) => {
             hideInTable: true,
         },
         {
+            title: '最后更新时间',
+            dataIndex: 'lastFollowTime',
+            key: 'lastFollowTime',
+            valueType: 'dateTime',
+            // hideInTable: true,
+        },
+        {
             title: '性别',
             dataIndex: 'gender',
             key: 'gender',
@@ -267,6 +274,7 @@ const CustomerList = ({ isActive }: { isActive: boolean }) => {
             title: '操作',
             valueType: 'option',
             width: 220,
+            fixed: 'right',
             render: (_, record) => record.isActive ? <Space>
                 <ModalForm
                     key={record.id}
@@ -321,6 +329,7 @@ const CustomerList = ({ isActive }: { isActive: boolean }) => {
 
     return (
         <ProTable<CustomerListItem>
+
             actionRef={actionRef}
             columns={columns}
             request={async ({ current, pageSize, ...rest }) => {
@@ -339,6 +348,7 @@ const CustomerList = ({ isActive }: { isActive: boolean }) => {
                 showSizeChanger: true,
             }}
             search={{
+                labelWidth: 100,
                 defaultCollapsed: false,
             }}
             onSubmit={(values: any) => {
@@ -349,6 +359,7 @@ const CustomerList = ({ isActive }: { isActive: boolean }) => {
                 setSearchParams({});
                 actionRef.current?.reload();
             }}
+            scroll={{ x: 'max-content' }}
             dateFormatter="string"
             headerTitle={isActive ? '客户列表' : '已删除客户'}
             toolBarRender={() => [
