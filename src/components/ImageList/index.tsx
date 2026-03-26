@@ -1,6 +1,8 @@
 import React from 'react';
 import { Image, List } from 'antd';
 
+export const ossUrl = 'https://hongli-hezhenli.oss-cn-beijing.aliyuncs.com/';
+
 interface ImageListProps {
   images: string;
 }
@@ -23,7 +25,7 @@ const ImageList: React.FC<ImageListProps> = ({ images }) => {
             <Image
               width={100}
               height={100}
-              src={'/' + image}
+              src={ossUrl + image}
               alt={`图片 ${index + 1}`}
               preview={{
                 mask: '点击预览',

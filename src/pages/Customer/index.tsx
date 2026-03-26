@@ -1,13 +1,15 @@
 import { ProTable, ModalForm } from "@ant-design/pro-components";
 import { getCustomerList, updateCustomer, getAllUsers, createCustomer, createFollowUp } from "@/services";
 import { Avatar, Space, Tag, Button, Popconfirm, Tabs } from "antd";
-import ImageList from "@/components/ImageList";
+import ImageList, { ossUrl } from "@/components/ImageList";
 import { ProFormText, ProFormTextArea, ProFormCheckbox, ProFormSelect, ProFormRadio, ProFormUploadButton } from "@ant-design/pro-components";
 import moment from "moment";
 import { useRef, useState } from "react";
 import { getAllGoods } from "@/services";
 import { useRequest } from "ahooks";
 import type { ActionType, ProColumns } from "@ant-design/pro-components";
+import { useModel } from "@umijs/max";
+
 
 interface CustomerListItem {
     id: string;
@@ -65,6 +67,8 @@ const CustomerModal = ({ record, onSuccess, goodsList, isAdd = false, allUsers }
     { record?: any, onSuccess?: () => void, goodsList?: any[], isAdd?: boolean, allUsers?: any[] }
 ) => {
 
+    const { initialState } = useModel('@@initialState');
+
     const { run: updateCustomerRun } = useRequest(updateCustomer, {
         manual: true,
         onSuccess: () => {
@@ -84,7 +88,7 @@ const CustomerModal = ({ record, onSuccess, goodsList, isAdd = false, allUsers }
         initialValues={record ? {
             ...record,
             images: record.images?.split(',').filter((el: string) => el).map((el: string) => ({
-                url: "/" + el
+                url: ossUrl + el
             }))
         } : undefined}
         title="编辑客户"
@@ -95,7 +99,7 @@ const CustomerModal = ({ record, onSuccess, goodsList, isAdd = false, allUsers }
             if (images.length > 0) {
                 const uploadPromises = await Promise.all(images.map(async ({ url, response }: any) => {
                     if (url) {
-                        return url.slice(1);
+                        return url.slice(ossUrl.length);
                     }
                     return response?.data?.filename ?? '';
                 }));
@@ -111,7 +115,7 @@ const CustomerModal = ({ record, onSuccess, goodsList, isAdd = false, allUsers }
     >
         <ProFormText name="name" label="客户名称" disabled={record?.userid} rules={[{ required: true, message: '请输入客户名称' }]} />
         {
-            isAdd && <ProFormSelect name="followUserids" label="跟进人" options={allUsers?.filter((el: any) => el.userid).map((el: any) => ({
+            isAdd && <ProFormSelect initialValue={initialState?.currentUser?.userid} name="followUserids" label="跟进人" options={allUsers?.filter((el: any) => el.userid).map((el: any) => ({
                 label: el.name,
                 value: el.userid
             }))} rules={[{ required: true, message: '请选择跟进人' }]} />
